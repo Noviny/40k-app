@@ -6,7 +6,7 @@ import { gql } from "@ts-gql/tag";
 import { Button } from "../../design-system/Button";
 import Boards from "../../Boards";
 import { Textarea } from "../../design-system/TextArea";
-import { useMemo, useState } from "react";
+import useDebouncedState from "../../../lib/use-debounced-state";
 
 const END_BATTLE = gql`
   mutation endBattle($id: ID!) {
@@ -25,38 +25,23 @@ const UPDATE_DESCRIPTION = gql`
   }
 ` as import("../../../../__generated__/ts-gql/updateBattleDescription").type;
 
-const debounce = (func, wait = 1000) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      timeout = null;
-      func(...args), wait;
-    });
-  };
-};
-
 const PlayerPlaying = ({ theirArmy, myArmy, battleId, description }) => {
-  const [endBattle] = useMutation(END_BATTLE);
-  const [description2, udpateDescription] = useState(description);
-
-  const [updateDescriptionMutation] = useMutation(UPDATE_DESCRIPTION);
-
-  const debounced = debounce((description3) =>
-    updateDescriptionMutation({
-      variables: { id: battleId, description: description3 },
-    })
+  const [args, udpateDescription] = useDebouncedState(
+    { id: battleId, description: description },
+    UPDATE_DESCRIPTION
   );
 
-  useMemo(() => debounced(description2), [description2]);
+  const [endBattle] = useMutation(END_BATTLE);
 
   return (
     <>
       <Boards army1={myArmy} army2={theirArmy} isInteractable />
       <div>
         <Textarea
-          value={description2}
-          onChange={({ target }) => udpateDescription(target.value)}
+          value={args.description}
+          onChange={({ target }) =>
+            udpateDescription({ ...args, description: target.value })
+          }
         />
       </div>
       <div css={{ display: "flex", justifyContent: "center", paddingTop: 24 }}>

@@ -62,3 +62,4 @@ Army
 - Handle errors better - consistently handle 'logged out' errors and views for pages
 - Add battle 'locations' ala Mark's fun idea, so there's more inbuilt personality
 - add ability to add photos so battle narrative can be written out during play
+- add stratagems in, omg this would help me so much, plus phase-based army notations

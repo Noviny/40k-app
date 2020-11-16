@@ -40,7 +40,7 @@ const LoggedIn = ({ name }) => {
         css={{ padding: 4 }}
         onClick={() => {
           logOut().then(() => {
-            client.resetStore();
+            client.cache.reset();
           });
         }}
       >
@@ -66,7 +66,7 @@ const LogIn = () => {
               email,
               password,
             },
-          }).then(() => client.resetStore());
+          }).then(() => client.cache.reset());
         }}
       >
         <Input

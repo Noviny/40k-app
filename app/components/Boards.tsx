@@ -2,8 +2,10 @@
 import { jsx } from "@emotion/core";
 import { useMutation } from "@ts-gql/apollo";
 import { gql } from "@ts-gql/tag";
+import { useState } from "react";
 import { colours } from "../lib/colours";
 import { BattleInfo } from "../lib/fragments";
+import useDebouncedState from "../lib/use-debounced-state";
 
 type BoardProps = BattleInfo & {
   isInteractable?: boolean;
@@ -27,25 +29,44 @@ const UPDATE_CP = gql`
   }
 ` as import("../../__generated__/ts-gql/updateCP").type;
 
-const Imp = ({ name, score, isInteractable, onChange, max = 15 }) => (
-  <li key={name} css={{ display: "flex", justifyContent: "space-between" }}>
-    <span>{name}:</span>
-    <span>
-      {isInteractable ? (
-        <input
-          type="number"
-          value={score}
-          onChange={onChange}
-          css={{ width: 40, textAlign: "center" }}
-          min="0"
-          max={max}
-        />
-      ) : (
-        score
-      )}
-    </span>
-  </li>
-);
+const Objective = ({
+  name,
+  score,
+  isInteractable,
+  max = 15,
+  id,
+  bonusCss = {},
+}) => {
+  const [args, updateScore] = useDebouncedState(
+    { id, score: parseInt(score) },
+    UPDATE_OBJECTIVE_SCORE
+  );
+
+  return (
+    <li
+      key={name}
+      css={{ display: "flex", justifyContent: "space-between", ...bonusCss }}
+    >
+      <span>{name}:</span>
+      <span>
+        {isInteractable ? (
+          <input
+            type="number"
+            value={args.score}
+            onChange={({ target }) =>
+              updateScore({ id, score: parseInt(target.value) })
+            }
+            css={{ width: 40, textAlign: "center" }}
+            min="0"
+            max={max}
+          />
+        ) : (
+          args.score
+        )}
+      </span>
+    </li>
+  );
+};
 
 const Board = ({
   primary,
@@ -56,46 +77,49 @@ const Board = ({
   notes,
   id,
 }: BoardProps) => {
-  const [updateObjective] = useMutation(UPDATE_OBJECTIVE_SCORE);
   const [updateCP] = useMutation(UPDATE_CP);
 
   return (
     <div css={{ maxWidth: 200, display: "inline-block" }}>
       <h2>{army.owner.name}</h2>
       <ul css={{ padding: 0 }}>
-        <Imp
+        <Objective
           {...primary}
+          bonusCss={{ fontWeight: "bold" }}
           name={primary.selection.name}
           max={45}
-          onChange={({ target }) =>
-            updateObjective({
-              variables: { id: primary.id, score: parseInt(target.value) },
-            })
-          }
           isInteractable={isInteractable}
         />
         {secondaries.map((secondary) => (
-          <Imp
+          <Objective
             {...secondary}
             name={secondary.selection.name}
             key={secondary.selection.name}
-            onChange={({ target }) =>
-              updateObjective({
-                variables: { id: secondary.id, score: parseInt(target.value) },
-              })
-            }
             isInteractable={isInteractable}
           />
         ))}
-        <Imp
-          isInteractable={isInteractable}
-          name="CP"
-          score={CP}
-          max={99}
-          onChange={({ target }) =>
-            updateCP({ variables: { id, CP: parseInt(target.value) } })
-          }
-        />
+        <li
+          key={name}
+          css={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>CP:</span>
+          <span>
+            {isInteractable ? (
+              <input
+                type="number"
+                value={CP}
+                onChange={({ target }) =>
+                  updateCP({ variables: { id, CP: parseInt(target.value) } })
+                }
+                css={{ width: 40, textAlign: "center" }}
+                min="0"
+                max="99"
+              />
+            ) : (
+              CP
+            )}
+          </span>
+        </li>
       </ul>
       <div
         css={{
