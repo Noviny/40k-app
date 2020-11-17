@@ -16,6 +16,9 @@ const GET_BATTLE = gql`
     Battle(where: { id: $id }) {
       status
       id
+      mission {
+        id
+      }
       description
       army1 {
         ...Army_info
@@ -52,6 +55,7 @@ const PlayerView = ({
   status,
   userId,
   id,
+  mission,
   refetch,
   startPolling,
   description,
@@ -62,7 +66,7 @@ const PlayerView = ({
     return (
       <PlayerPlanning
         army={myArmy}
-        id={id}
+        id={mission.id}
         refetch={refetch}
         opponentID={theirArmy.id}
       />
