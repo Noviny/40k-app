@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/core";
 import { useMutation } from "@ts-gql/apollo";
 import { gql } from "@ts-gql/tag";
-import { useState } from "react";
 import { colours } from "../lib/colours";
 import { BattleInfo } from "../lib/fragments";
 import useDebouncedState from "../lib/use-debounced-state";
@@ -31,14 +30,14 @@ const UPDATE_CP = gql`
 
 const Objective = ({
   name,
-  score,
+  score: initialScore,
   isInteractable,
   max = 15,
   id,
   bonusCss = {},
 }) => {
-  const [args, updateScore] = useDebouncedState(
-    { id, score: parseInt(score) },
+  const [{ score }, updateScore] = useDebouncedState(
+    { id, score: parseInt(initialScore) },
     UPDATE_OBJECTIVE_SCORE
   );
 
@@ -52,16 +51,20 @@ const Objective = ({
         {isInteractable ? (
           <input
             type="number"
-            value={args.score}
+            value={score}
             onChange={({ target }) =>
-              updateScore({ id, score: parseInt(target.value) })
+              updateScore({
+                id,
+                score: parseInt(target.value),
+                skipUpdate: target.value === "",
+              })
             }
             css={{ width: 40, textAlign: "center" }}
             min="0"
             max={max}
           />
         ) : (
-          args.score
+          score
         )}
       </span>
     </li>
@@ -73,11 +76,14 @@ const Board = ({
   secondaries,
   isInteractable = false,
   army,
-  CP,
+  CP: initialCP,
   notes,
   id,
 }: BoardProps) => {
-  const [updateCP] = useMutation(UPDATE_CP);
+  const [{ CP }, updateCP] = useDebouncedState(
+    { id, CP: initialCP },
+    UPDATE_CP
+  );
 
   return (
     <div css={{ maxWidth: 200, display: "inline-block" }}>
@@ -109,7 +115,11 @@ const Board = ({
                 type="number"
                 value={CP}
                 onChange={({ target }) =>
-                  updateCP({ variables: { id, CP: parseInt(target.value) } })
+                  updateCP({
+                    id,
+                    CP: parseInt(target.value),
+                    skipUpdate: target.value === "",
+                  })
                 }
                 css={{ width: 40, textAlign: "center" }}
                 min="0"

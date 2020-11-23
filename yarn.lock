@@ -4514,10 +4514,10 @@
     "@babel/helper-module-imports" "^7.8.3"
     "@babel/runtime" "^7.9.2"
 
-"@ts-gql/compiler@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@ts-gql/compiler/-/compiler-0.14.0.tgz#8af5a29ca7454e1e82a2d1902d7445f6edecfd05"
-  integrity sha512-ENlWy5o8UHgpJHmT+OyDWD3kDYHJ3g0HZnWB2L1H9ksGqEZHe6JWNh17BKm0W2F0264/v85W00JxYy68aRgr4Q==
+"@ts-gql/compiler@^0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@ts-gql/compiler/-/compiler-0.14.1.tgz#9adcd7b1ef9e6522efa850368fe6c5b50fb79f74"
+  integrity sha512-G2foGhDSJL+p3I4tdfgkyKdBnMzZ3QkEN5EgZj1mZVsBiNVo0YRiZ4hlJ7RMJuJP4cyL+4spJsRpU0rYvCst5Q==
   dependencies:
     "@babel/code-frame" "^7.8.3"
     "@babel/parser" "^7.9.6"

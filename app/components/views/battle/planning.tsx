@@ -12,6 +12,7 @@ import { armyInfoFragment } from "../../../lib/fragments";
 import MissionDisplay from "../../MissionDisplay";
 
 import { GET_AVAILABLE_SECONDARIES } from "../../../lib/queries";
+import ShowError from "../../Error";
 const UPDATE_INFO = gql`
   mutation preBattleUpdateInfo($armyInfoID: ID!, $notes: String!) {
     updateBattleInfo(id: $armyInfoID, data: { notes: $notes }) {
@@ -141,17 +142,19 @@ const validateSecondaries = (
 
 const PlayerPlanning = ({
   army,
-  id,
+  missionId,
+  battleId,
   opponentID,
   refetch,
 }: {
   army: typeof armyInfoFragment.___type.result;
-  id: string;
+  missionId: string;
+  battleId: string;
   refetch: Function;
   opponentID: string;
 }) => {
   const { data } = useQuery(GET_AVAILABLE_SECONDARIES, {
-    variables: { missionID: id },
+    variables: { missionID: missionId },
   });
 
   const { data: opponentSecondaries } = useQuery(CHECK_OPPONENT_READY, {
@@ -177,7 +180,8 @@ const PlayerPlanning = ({
   );
 
   const [preBattleUpdateInfo] = useMutation(UPDATE_INFO);
-  const [activateBattle] = useMutation(MAKE_BATTLE_ACTIVE);
+  const [activateBattle, { error, loading }] = useMutation(MAKE_BATTLE_ACTIVE);
+
   // we assume if there is no army, that means that the user is not logged in
   // this is an accurate but inellegant handle
   if (!army) {
@@ -188,19 +192,21 @@ const PlayerPlanning = ({
 
   const [notes, setNotes] = useState(army.notes || "");
 
+  if (error) return <ShowError code={JSON.stringify(error, null, 2)} />;
+
   // TODO: validate your secondaries picks and warn for errors
   // Major errors are:
   //    Picking the same secondary twice
   //    Having two secondaries from the same category
   return (
     <>
-      <MissionDisplay id={id} />
+      <MissionDisplay id={missionId} />
       <i>
         NOTE: Before selecting secondaries, you should exchange army lists with
         your opponent
       </i>
       <div css={{ paddingTop: 8 }}>
-        <Link href={`/battle/${id}/secondary-options`}>
+        <Link href={`/battle/${battleId}/secondary-options`}>
           <a>View all secondaries rules</a>
         </Link>
       </div>
@@ -244,8 +250,11 @@ const PlayerPlanning = ({
           disabled={
             opponentReady.status !== "ready" || iAmReady.status !== "ready"
           }
+          isLoading={loading}
           onClick={() =>
-            activateBattle({ variables: { id } }).then(() => refetch())
+            activateBattle({ variables: { id: battleId } })
+              .then(() => refetch())
+              .catch((e) => console.log(e))
           }
         >
           Begin Battle

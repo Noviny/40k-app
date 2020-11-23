@@ -75,8 +75,6 @@ const mathsHammer = (
 ) => {
   let mortalWounds = 0;
 
-  console.log("rest", rest);
-
   toHit = toHit + bonusToHit > 6 ? 6 : toHit + bonusToHit;
 
   let { successes: hits, failures: misses, perNumber } = getNum(shots, toHit);

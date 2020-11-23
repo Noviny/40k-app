@@ -54,6 +54,8 @@ const Link = ({ href, mode, ...rest }) =>
 export const Button = ({
   href,
   mode = "action",
+  isLoading = false,
+  children,
   ...rest
 }: {
   href?: string;
@@ -61,9 +63,14 @@ export const Button = ({
   onClick?: () => any;
   children: ReactNode;
   disabled?: boolean;
+  isLoading?: boolean;
 }) =>
   href ? (
-    <Link href={href} mode={mode} {...rest} />
+    <Link href={href} mode={mode} {...rest}>
+      {children}
+    </Link>
   ) : (
-    <button {...rest} css={styles[mode]} />
+    <button {...rest} css={styles[mode]}>
+      {isLoading ? "loading..." : children}
+    </button>
   );

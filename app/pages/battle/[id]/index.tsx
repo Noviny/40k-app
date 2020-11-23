@@ -66,9 +66,10 @@ const PlayerView = ({
     return (
       <PlayerPlanning
         army={myArmy}
-        id={mission.id}
+        missionId={mission.id}
         refetch={refetch}
         opponentID={theirArmy.id}
+        battleId={id}
       />
     );
   } else if (status === "inProgress") {

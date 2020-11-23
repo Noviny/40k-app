@@ -16,10 +16,14 @@ const useDebouncedState = (state, mutation) => {
   const [mutationMutation] = useMutation(mutation);
   const [value, updateValue] = useState(state);
 
-  const debounced = debounce((val) =>
-    mutationMutation({
-      variables: val,
-    })
+  useMemo(() => updateValue(state), [JSON.stringify(state)]);
+
+  const debounced = debounce(
+    ({ skipUpdate, ...val }) =>
+      !skipUpdate &&
+      mutationMutation({
+        variables: val,
+      })
   );
 
   useMemo(() => debounced(value), [value]);
