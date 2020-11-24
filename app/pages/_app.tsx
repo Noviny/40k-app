@@ -35,6 +35,7 @@ const linkCss = {
   justifyContent: "center",
   alignItems: "center",
   width: 60,
+  textDecoration: "none",
   backgroundColor: colours.grey100,
   borderLeft: `1px solid ${colours.red800}`,
   borderRight: `1px solid ${colours.red800}`,
@@ -70,6 +71,7 @@ const Header = () => {
         <div css={{ width: 24 }} />
         <HeaderLink href="/">Home</HeaderLink>
         <HeaderLink href="/battle">Battles</HeaderLink>
+        <HeaderLink href="/maths-hammer">Maths Hammer</HeaderLink>
         <AdminLink href="/admin">Admin</AdminLink>
         <div css={{ marginLeft: "auto", marginRight: 16 }}>
           {data &&

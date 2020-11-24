@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "../components/design-system/Button";
 import { Input } from "../components/design-system/Input";
-import { colours } from "../lib/colours";
 
 const round = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
@@ -55,9 +54,11 @@ const mathsHammer = (
     toHit = 4,
     strength = 5,
     AP = 0,
+    weaponDamage = 1,
     vsToughness = 4,
     vsArmour = 3,
-    vsInvuln = 0,
+    vsInvuln = 7,
+    shrug = 7,
     ...rest
   } = {},
   {
@@ -73,6 +74,8 @@ const mathsHammer = (
     autoWoundOn6s = false,
   } = {}
 ) => {
+  vsInvuln = vsInvuln < 7 ? vsInvuln : 0;
+
   let mortalWounds = 0;
 
   toHit = toHit + bonusToHit > 6 ? 6 : toHit + bonusToHit;
@@ -156,10 +159,20 @@ const mathsHammer = (
 
   let { successes: passedSaves, failures: damage } = getNum(wounds, saveNeeded);
 
+  damage = damage * weaponDamage;
+
+  damage += mortalWounds;
+
+  if (shrug < 7) {
+    let { failures } = getNum(damage, shrug);
+
+    damage = failures;
+  }
+
   return {
     hits: round(hits),
     wounds: round(wounds),
-    damage: round(damage + mortalWounds),
+    damage: round(damage),
     mortalWounds: round(mortalWounds),
   };
 };
@@ -185,6 +198,7 @@ const AttackerBlock = ({
         changeAP={(newVal) => updateValue("AP", newVal)}
         changeStrength={(newVal) => updateValue("strength", newVal)}
         changeToHit={(newVal) => updateValue("toHit", newVal)}
+        changeWeaponDamage={(newVal) => updateValue("weaponDamage", newVal)}
       />
     </div>
   );
@@ -199,6 +213,8 @@ const AttackerStats = ({
   changeStrength,
   AP,
   changeAP,
+  weaponDamage,
+  changeWeaponDamage,
 }) => (
   <div>
     <Input
@@ -229,6 +245,13 @@ const AttackerStats = ({
       value={AP}
       onChange={({ target }) => changeAP(parseInt(target.value))}
     />
+    <Input
+      min={0}
+      label="Weapon Damage"
+      type="number"
+      value={weaponDamage}
+      onChange={({ target }) => changeWeaponDamage(parseInt(target.value))}
+    />
   </div>
 );
 
@@ -250,6 +273,7 @@ const DefenderBlock = ({
         changeVsToughness={(newVal) => updateValue("vsToughness", newVal)}
         changeArmour={(newVal) => updateValue("vsArmour", newVal)}
         changeVsInvuln={(newVal) => updateValue("vsInvuln", newVal)}
+        changeShrug={(newVal) => updateValue("shrug", newVal)}
       />
     </div>
   );
@@ -262,6 +286,8 @@ const DefenderStats = ({
   changeArmour,
   vsInvuln,
   changeVsInvuln,
+  shrug,
+  changeShrug,
 }) => (
   <>
     <Input
@@ -280,17 +306,36 @@ const DefenderStats = ({
     />
     <Input
       min={2}
-      max={6}
+      max={7}
       label="Invulnerable"
       type="number"
       value={vsInvuln}
       onChange={({ target }) => changeVsInvuln(parseInt(target.value))}
     />
+    <Input
+      min={2}
+      max={7}
+      label="Shrug"
+      type="number"
+      value={shrug}
+      onChange={({ target }) => changeShrug(parseInt(target.value))}
+    />
   </>
 );
 
-const defaultDefenderBlock = { vsInvuln: 0, vsArmour: 3, vsToughness: 4 };
-const defaultAttackerBlock = { shots: 10, toHit: 4, strength: 5, AP: 0 };
+const defaultDefenderBlock = {
+  vsInvuln: 7,
+  vsArmour: 3,
+  vsToughness: 4,
+  shrug: 7,
+};
+const defaultAttackerBlock = {
+  shots: 10,
+  toHit: 4,
+  strength: 5,
+  AP: 0,
+  weaponDamage: 1,
+};
 
 const Result = ({
   attackerValues,
@@ -349,7 +394,7 @@ const Page = () => {
   return (
     <div>
       <h1>Maths Hammer</h1>
-      <h2>My Profile</h2>
+      <h2>Attacker Profile</h2>
       <Button disabled={true}>Load unit info</Button>
       <Button
         onClick={() =>
@@ -379,7 +424,7 @@ const Page = () => {
           }
         />
       ))}
-      <h2>Their profile</h2>
+      <h2>Defender profile</h2>
       <Button disabled={true}>Load unit info</Button>
       <Button
         onClick={() =>

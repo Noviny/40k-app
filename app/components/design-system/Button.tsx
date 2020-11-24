@@ -15,6 +15,7 @@ const defaultStyles = {
 const styles = {
   action: {
     ...defaultStyles,
+    cursor: "pointer",
     backgroundColor: colours.green100,
     ":hover": {
       backgroundColor: colours.green200,
@@ -25,6 +26,7 @@ const styles = {
     ":disabled": {
       backgroundColor: colours.neutral100,
       color: colours.neutral400,
+      cursor: "not-allowed",
     },
   },
   // warning: {

@@ -2,12 +2,13 @@
 import { jsx } from "@emotion/core";
 import { useMutation, useQuery } from "@ts-gql/apollo";
 import { gql } from "@ts-gql/tag";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Router from "next/router";
 
 import { Input } from "../components/design-system/Input";
 import { Button } from "../components/design-system/Button";
 import { AUTHED_USER } from "../lib/queries";
+import { colours } from "../lib/colours";
 
 const AUTH_USER = gql`
   mutation signin($email: String, $password: String) {
@@ -52,12 +53,15 @@ const LoggedIn = ({ name }) => {
 };
 
 const LogIn = () => {
-  const [authUser] = useMutation(AUTH_USER);
+  const [authUser, { error, data }] = useMutation(AUTH_USER);
   const [email, updateEmail] = useState("");
   const [password, updatePassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  useMemo(() => setErrorMessage(null), [email, password]);
 
   return (
-    <div>
+    <div css={{ color: colours.neutral900, padding: 8 }}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -67,7 +71,13 @@ const LogIn = () => {
               email,
               password,
             },
-          }).then(() => Router.reload());
+          })
+            .then(() => Router.reload())
+            .catch((err) =>
+              err.message.startsWith("[passwordAuth:secret:mismatch]")
+                ? setErrorMessage("The username and/or password were incorrect")
+                : setErrorMessage(err.message)
+            );
         }}
       >
         <Input
@@ -100,6 +110,7 @@ const LogIn = () => {
           <input css={{ padding: 4 }} type="submit" value="Sign in" />
         </div>
       </form>
+      {errorMessage && <p css={{ color: colours.red400 }}>{errorMessage}</p>}
     </div>
   );
 };

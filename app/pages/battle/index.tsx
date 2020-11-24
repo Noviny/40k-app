@@ -55,10 +55,10 @@ const TR = (props) => (
   <tr
     css={{
       borderBottom: `2px solid ${palette.neutral500}`,
-      ":nth-child(even)": {
+      ":nth-of-type(even)": {
         backgroundColor: colours.neutral100,
       },
-      ":nth-child(odd)": {
+      ":nth-of-type(odd)": {
         backgroundColor: colours.neutral200,
       },
     }}
@@ -156,9 +156,7 @@ const Page = () => (
       }}
     >
       <h1>List of Battles:</h1>
-      <Link href="/battle/create">
-        <Button>Create a new battle</Button>
-      </Link>
+      <Button href="/battle/create">Create a new battle</Button>
     </div>
     <BattleList />
   </>

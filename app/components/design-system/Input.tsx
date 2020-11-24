@@ -14,6 +14,7 @@ const Input = ({
   label,
   labelCss = {},
   inputCss = {},
+  value,
   ...rest
 }: InputProps) => (
   <div css={{ paddingTop: 12 }}>
@@ -35,6 +36,7 @@ const Input = ({
         border: `solid ${colours.neutral300} 1px`,
         ...inputCss,
       }}
+      value={typeof value === "number" && isNaN(value) ? "" : value}
       {...rest}
     />
   </div>
