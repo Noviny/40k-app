@@ -110,6 +110,7 @@ const GET_INITIAL_DATA = gql`
     allMissions {
       id
       name
+      source
       forceSize
       primary {
         id
@@ -153,11 +154,13 @@ const Create = () => {
   const [army2ID, setArmy2] = useState();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [points, setPoints] = useState(2000);
+  const [chosenSource, setChosenSource] = useState("core rulebook");
   const { missionID, primaryID, updateMissions } = useMissionStuff();
   const [description, setDescription] = useState("");
   const { push } = useRouter();
 
   let missionSize = useMemo(() => getMissionSize(points), [points]);
+  const sources = ["core rulebook", "grand tournament 2020"];
 
   const [createABattle, { data: createData }] = useMutation(CREATE_BATTLE);
 
@@ -167,6 +170,7 @@ const Create = () => {
         ?.filter(({ forceSize }) => forceSize === missionSize.key, [
           missionSize.key,
         ])
+        .filter(({ source }) => source === chosenSource)
         .map(({ name, id, primary }) => ({
           value: id,
           label: name,
@@ -212,14 +216,17 @@ const Create = () => {
               onChange={setArmy2}
             />
           </div>
-          <Input
-            label="Set Number of Points"
-            labelCss={{ width: "auto" }}
-            inputCss={{ textAlign: "center" }}
-            type="number"
-            value={points}
-            onChange={({ target }) => setPoints(parseInt(target.value))}
-          />
+          <div css={{ display: "flex", alignItems: "baseline" }}>
+            <Input
+              label="Set Number of Points"
+              labelCss={{ width: "auto" }}
+              inputCss={{ textAlign: "center" }}
+              type="number"
+              value={points}
+              onChange={({ target }) => setPoints(parseInt(target.value))}
+            />
+            <span css={{ paddingLeft: 16 }}>({missionSize.label})</span>
+          </div>
           <div>
             <div
               css={{
@@ -248,6 +255,13 @@ const Create = () => {
               }
             />
           </div>
+          {/* <Select
+            isSearchable={false}
+            options={sources.map((s) => ({ label: s, value: s }))}
+            onChange={(item, { action }) =>
+              action === "select-option" && setChosenSource(item)
+            }
+          /> */}
           {missionID && <MissionDisplay id={missionID} />}
           <div css={{ paddingTop: 8 }}>
             <label css={{ paddingRight: 8 }}>Select Date</label>

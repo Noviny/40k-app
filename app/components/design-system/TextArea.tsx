@@ -8,6 +8,8 @@ const Textarea = (props) => (
       width: "100%",
       borderRadius: 4,
       border: `solid ${palette.neutral500} 1px`,
+      fontFamily: "inherit",
+      padding: 4,
     }}
     rows={5}
     {...props}

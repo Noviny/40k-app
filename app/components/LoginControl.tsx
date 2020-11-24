@@ -3,6 +3,7 @@ import { jsx } from "@emotion/core";
 import { useMutation, useQuery } from "@ts-gql/apollo";
 import { gql } from "@ts-gql/tag";
 import { useState } from "react";
+import Router from "next/router";
 
 import { Input } from "../components/design-system/Input";
 import { Button } from "../components/design-system/Button";
@@ -31,7 +32,7 @@ const LOG_OUT = gql`
 ` as import("../../__generated__/ts-gql/unauthUser").type;
 
 const LoggedIn = ({ name }) => {
-  const [logOut, { client }] = useMutation(LOG_OUT);
+  const [logOut] = useMutation(LOG_OUT);
 
   return (
     <div>
@@ -40,7 +41,7 @@ const LoggedIn = ({ name }) => {
         css={{ padding: 4 }}
         onClick={() => {
           logOut().then(() => {
-            client.cache.reset();
+            Router.reload();
           });
         }}
       >
@@ -51,7 +52,7 @@ const LoggedIn = ({ name }) => {
 };
 
 const LogIn = () => {
-  const [authUser, { client }] = useMutation(AUTH_USER);
+  const [authUser] = useMutation(AUTH_USER);
   const [email, updateEmail] = useState("");
   const [password, updatePassword] = useState("");
 
@@ -66,7 +67,7 @@ const LogIn = () => {
               email,
               password,
             },
-          }).then(() => client.cache.reset());
+          }).then(() => Router.reload());
         }}
       >
         <Input

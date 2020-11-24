@@ -10,6 +10,10 @@ import LoginControl from "../components/LoginControl";
 import { colours } from "../lib/colours";
 import { useQuery } from "@ts-gql/apollo";
 import { AUTHED_USER } from "../lib/queries";
+import { Button } from "../components/design-system/Button";
+import { useState } from "react";
+
+const pageColour = "#dcdcd8";
 
 const Page = (props) => (
   <div
@@ -21,64 +25,86 @@ const Page = (props) => (
   />
 );
 
-const AdminLink = (props) => (
-  <a
-    css={{
-      paddingRight: 8,
-      paddingLeft: 8,
-      height: "100%",
-      color: colours.grey900,
-      cursor: "pointer",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: 60,
-      backgroundColor: colours.grey100,
-      borderLeft: `1px solid ${colours.red800}`,
-      borderRight: `1px solid ${colours.red800}`,
-    }}
-    {...props}
-  />
-);
+const linkCss = {
+  paddingRight: 8,
+  paddingLeft: 8,
+  height: "100%",
+  color: colours.grey900,
+  cursor: "pointer",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  width: 60,
+  backgroundColor: colours.grey100,
+  borderLeft: `1px solid ${colours.red800}`,
+  borderRight: `1px solid ${colours.red800}`,
+  ":hover": {
+    backgroundColor: colours.grey200,
+  },
+  ":active": {
+    backgroundColor: colours.green300,
+  },
+};
+
+const AdminLink = (props) => <a css={linkCss} {...props} />;
 
 const HeaderLink = ({ href, ...rest }) => (
-  <Link href={href}>
-    <a
-      css={{
-        paddingRight: 8,
-        paddingLeft: 8,
-        height: "100%",
-        color: colours.grey900,
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: 60,
-        backgroundColor: colours.grey100,
-        borderLeft: `1px solid ${colours.red800}`,
-        borderRight: `1px solid ${colours.red800}`,
-      }}
-      {...rest}
-    />
+  <Link passHref href={href}>
+    <a css={linkCss} {...rest} />
   </Link>
 );
 
-const Header = () => (
-  <div
-    css={{
-      height: 92,
-      backgroundColor: colours.red700,
-      color: colours.grey200,
-    }}
-  >
-    <div css={{ display: "flex", alignItems: "center", height: "100%" }}>
-      <HeaderLink href="/">Hoem</HeaderLink>
-      <HeaderLink href="/battle">Battels</HeaderLink>
-      <AdminLink href="/admin">Admine</AdminLink>
-      <div css={{ marginLeft: "auto", marginRight: 16 }}>
-        <LoginControl />
+const Header = () => {
+  let { data } = useQuery(AUTHED_USER);
+  let [showLogIn, toggleShowLogin] = useState(false);
+
+  return (
+    <div
+      css={{
+        height: 52,
+        backgroundColor: colours.red900,
+        color: colours.grey200,
+      }}
+    >
+      <div css={{ display: "flex", alignItems: "center", height: "100%" }}>
+        <div css={{ width: 24 }} />
+        <HeaderLink href="/">Home</HeaderLink>
+        <HeaderLink href="/battle">Battles</HeaderLink>
+        <AdminLink href="/admin">Admin</AdminLink>
+        <div css={{ marginLeft: "auto", marginRight: 16 }}>
+          {data &&
+            (data.authenticatedUser ? (
+              <LoginControl />
+            ) : (
+              <Button onClick={() => toggleShowLogin(true)}>Log in</Button>
+            ))}
+          {showLogIn && (
+            <div
+              css={{
+                position: "absolute",
+                backgroundColor: "white",
+                top: "54px",
+                margin: "auto",
+                left: "calc(60% - 50px)",
+              }}
+            >
+              <LoginControl />
+            </div>
+          )}
+        </div>
       </div>
     </div>
+  );
+};
+
+const OddInterstitialThing = (props) => (
+  <div
+    css={{
+      backgroundColor: pageColour,
+      minHeight: "calc(100vh - 52px)",
+    }}
+  >
+    <div css={{ padding: 24 }} {...props} />
   </div>
 );
 
@@ -89,13 +115,14 @@ const Content = (props) => {
 
   if (!data) return null;
 
-  if (!data?.authenticatedUser?.id && pathname !== "/")
+  if (!data?.authenticatedUser?.id && pathname !== "/") {
     return (
-      <div css={{ backgroundColor: "white", padding: 24 }}>
+      <OddInterstitialThing>
         You are logged out! You'll need to log in to view this page
-      </div>
+      </OddInterstitialThing>
     );
-  return <div css={{ backgroundColor: "white", padding: 24 }} {...props} />;
+  }
+  return <OddInterstitialThing {...props} />;
 };
 
 const AppComponent = ({ Component, pageProps }) => {
@@ -107,7 +134,7 @@ const AppComponent = ({ Component, pageProps }) => {
         styles={css`
           body {
             margin: 0px;
-            background-color: ${colours.grey500};
+            background-color: ${colours.grey50};
           }
         `}
       />

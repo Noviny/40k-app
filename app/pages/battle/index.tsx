@@ -6,6 +6,8 @@ import Link from "next/link";
 import { palette } from "../../../palette";
 import { battleStatuses } from "../../../constants";
 import { getScore } from "../../lib/utilities";
+import { Button } from "../../components/design-system/Button";
+import { colours } from "../../lib/colours";
 
 const fragment = gql`
   fragment Army_info_2 on BattleInfo {
@@ -53,6 +55,12 @@ const TR = (props) => (
   <tr
     css={{
       borderBottom: `2px solid ${palette.neutral500}`,
+      ":nth-child(even)": {
+        backgroundColor: colours.neutral100,
+      },
+      ":nth-child(odd)": {
+        backgroundColor: colours.neutral200,
+      },
     }}
     {...props}
   />
@@ -81,14 +89,18 @@ const Table = ({ battles }) => {
       css={{ borderCollapse: "collapse", width: "100%", textAlign: "center" }}
     >
       <thead>
-        <TR>
+        <tr
+          css={{
+            borderBottom: `4px solid ${palette.neutral900}`,
+          }}
+        >
           <TH>Player 1</TH>
           <TH>(score)</TH>
           <TH>Player 2</TH>
           <TH>(score)</TH>
           <TH>Status</TH>
           <TH>Link</TH>
-        </TR>
+        </tr>
       </thead>
       <tbody>
         {battles.map(({ army1, army2, status, id }) => (
@@ -129,9 +141,6 @@ const BattleList = () => {
   // show a table of relevant info for each battle
   return (
     <div>
-      <Link href="/battle/create">
-        <a>Create a new battle</a>
-      </Link>
       <Table battles={sortedBattles} />
     </div>
   );
@@ -139,7 +148,18 @@ const BattleList = () => {
 
 const Page = () => (
   <>
-    <h1>List of Battles:</h1>
+    <div
+      css={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <h1>List of Battles:</h1>
+      <Link href="/battle/create">
+        <Button>Create a new battle</Button>
+      </Link>
+    </div>
     <BattleList />
   </>
 );

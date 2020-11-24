@@ -252,9 +252,9 @@ const PlayerPlanning = ({
           }
           isLoading={loading}
           onClick={() =>
-            activateBattle({ variables: { id: battleId } })
-              .then(() => refetch())
-              .catch((e) => console.log(e))
+            activateBattle({ variables: { id: battleId } }).then(() =>
+              refetch()
+            )
           }
         >
           Begin Battle
