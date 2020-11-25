@@ -18,18 +18,20 @@ const Input = ({
   ...rest
 }: InputProps) => (
   <div css={{ paddingTop: 12 }}>
-    <label
-      css={{
-        width: 80,
-        display: "inline-block",
-        textAlign: "right",
-        paddingRight: 4,
-        ...labelCss,
-      }}
-      htmlFor="email"
-    >
-      {label}:
-    </label>
+    {label && (
+      <label
+        css={{
+          width: 80,
+          display: "inline-block",
+          textAlign: "right",
+          paddingRight: 4,
+          ...labelCss,
+        }}
+        htmlFor="email"
+      >
+        {label}:
+      </label>
+    )}
     <input
       css={{
         borderRadius: 4,

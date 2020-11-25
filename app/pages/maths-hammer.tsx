@@ -7,6 +7,8 @@ import { Input } from "../components/design-system/Input";
 const round = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
 const getNum = (dice, required) => {
+  if (required < 2) required = 2;
+
   let successes = round(dice * ((7 - required) / 6));
 
   return {
@@ -32,19 +34,19 @@ const Checkbox = ({ checked, onChange, label, text }) => (
 );
 
 const getToWound = (strength, toughness) => {
-  let num = toughness / strength;
+  let num = strength / toughness;
 
   if (num >= 2) {
-    return 6;
+    return 2;
   } else if (num > 1) {
-    return 5;
+    return 3;
   }
   if (num === 1) {
     return 4;
   } else if (num <= 0.5) {
-    return 3;
+    return 6;
   } else {
-    return 2;
+    return 5;
   }
 };
 
@@ -59,6 +61,7 @@ const mathsHammer = (
     vsArmour = 3,
     vsInvuln = 7,
     shrug = 7,
+    enemyWounds = 1,
     ...rest
   } = {},
   {
@@ -74,11 +77,9 @@ const mathsHammer = (
     autoWoundOn6s = false,
   } = {}
 ) => {
-  vsInvuln = vsInvuln < 7 ? vsInvuln : 0;
-
   let mortalWounds = 0;
 
-  toHit = toHit + bonusToHit > 6 ? 6 : toHit + bonusToHit;
+  toHit = toHit - bonusToHit > 6 ? 6 : toHit - bonusToHit;
 
   let { successes: hits, failures: misses, perNumber } = getNum(shots, toHit);
 
@@ -118,7 +119,7 @@ const mathsHammer = (
   if (extraHitsOn6s) {
     hits += perNumber;
   }
-  let toWound = getToWound(strength, vsToughness) + bonusToWound;
+  let toWound = getToWound(strength, vsToughness) - bonusToWound;
 
   toWound = toWound > 6 ? 6 : toWound;
 
@@ -155,13 +156,20 @@ const mathsHammer = (
   let modifiedArmourSave = vsArmour - AP;
 
   let saveNeeded =
-    modifiedArmourSave > vsInvuln ? modifiedArmourSave : vsInvuln;
+    modifiedArmourSave < vsInvuln ? modifiedArmourSave : vsInvuln;
 
   let { successes: passedSaves, failures: damage } = getNum(wounds, saveNeeded);
+
+  let failedSaves = damage;
+  let modelsKilled = 0;
 
   damage = damage * weaponDamage;
 
   damage += mortalWounds;
+
+  let woundsToKill = Math.ceil(enemyWounds / weaponDamage);
+
+  modelsKilled = failedSaves / woundsToKill;
 
   if (shrug < 7) {
     let { failures } = getNum(damage, shrug);
@@ -174,6 +182,7 @@ const mathsHammer = (
     wounds: round(wounds),
     damage: round(damage),
     mortalWounds: round(mortalWounds),
+    modelsKilled: round(modelsKilled),
   };
 };
 
@@ -257,7 +266,7 @@ const AttackerStats = ({
 
 const DefenderBlock = ({
   index,
-  values,
+  values: { vsToughness, vsArmour, vsInvuln, shrug, enemyWounds },
   updateValue,
   disableRemoveButton,
   removeBlock,
@@ -268,63 +277,66 @@ const DefenderBlock = ({
       <Button disabled={disableRemoveButton} onClick={removeBlock}>
         -
       </Button>
-      <DefenderStats
+      {/* <DefenderStats
         {...values}
         changeVsToughness={(newVal) => updateValue("vsToughness", newVal)}
         changeArmour={(newVal) => updateValue("vsArmour", newVal)}
         changeVsInvuln={(newVal) => updateValue("vsInvuln", newVal)}
         changeShrug={(newVal) => updateValue("shrug", newVal)}
+        changeEnemyWounds={(newVal) => updateValue("enemyWounds", newVal)}
+      /> */}
+
+      <Input
+        label="Toughness"
+        type="number"
+        value={vsToughness}
+        onChange={({ target }) =>
+          updateValue("vsToughness", parseInt(target.value))
+        }
+      />
+      <Input
+        label="Wounds"
+        type="number"
+        value={enemyWounds}
+        onChange={({ target }) =>
+          updateValue("enemyWounds", parseInt(target.value))
+        }
+      />
+      <Input
+        min={2}
+        max={6}
+        label="Armour"
+        type="number"
+        value={vsArmour}
+        onChange={({ target }) =>
+          updateValue("vsArmour", parseInt(target.value))
+        }
+      />
+      <Input
+        min={2}
+        max={7}
+        label="Invulnerable"
+        type="number"
+        value={vsInvuln}
+        onChange={({ target }) =>
+          updateValue("vsInvuln", parseInt(target.value))
+        }
+      />
+      <Input
+        min={2}
+        max={7}
+        label="Shrug"
+        type="number"
+        value={shrug}
+        onChange={({ target }) => updateValue("shrug", parseInt(target.value))}
       />
     </div>
   );
 };
 
-const DefenderStats = ({
-  vsToughness,
-  changeVsToughness,
-  vsArmour,
-  changeArmour,
-  vsInvuln,
-  changeVsInvuln,
-  shrug,
-  changeShrug,
-}) => (
-  <>
-    <Input
-      label="Toughness"
-      type="number"
-      value={vsToughness}
-      onChange={({ target }) => changeVsToughness(parseInt(target.value))}
-    />
-    <Input
-      min={2}
-      max={6}
-      label="Armour"
-      type="number"
-      value={vsArmour}
-      onChange={({ target }) => changeArmour(parseInt(target.value))}
-    />
-    <Input
-      min={2}
-      max={7}
-      label="Invulnerable"
-      type="number"
-      value={vsInvuln}
-      onChange={({ target }) => changeVsInvuln(parseInt(target.value))}
-    />
-    <Input
-      min={2}
-      max={7}
-      label="Shrug"
-      type="number"
-      value={shrug}
-      onChange={({ target }) => changeShrug(parseInt(target.value))}
-    />
-  </>
-);
-
 const defaultDefenderBlock = {
   vsInvuln: 7,
+  enemyWounds: 1,
   vsArmour: 3,
   vsToughness: 4,
   shrug: 7,
@@ -344,7 +356,7 @@ const Result = ({
   attacker,
   defender,
 }) => {
-  const { hits, wounds, damage, mortalWounds } = mathsHammer(
+  const { hits, wounds, damage, mortalWounds, modelsKilled } = mathsHammer(
     { ...attackerValues, ...defenderValues },
     special
   );
@@ -357,6 +369,10 @@ const Result = ({
       <p>Wounds: {wounds}</p>
       <p>Damage: {damage}</p>
       <p>Mortal Wounds: {mortalWounds}</p>
+      <p>
+        Models killed: {modelsKilled} (this number is a bit fuzzy - also it
+        doesn't work with shrugs or mortal wounds)
+      </p>
     </div>
   );
 };
