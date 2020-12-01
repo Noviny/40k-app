@@ -1,3 +1,7 @@
+const costs = 165 * 2 + 74 * 3 + 90 * 2 + 85 + 66 * 2 + 85;
+
+console.log(costs);
+
 // const abilityCost = [0, 0, 4, 10, 20, 35, 55, 80];
 
 // const skillCost = [0, 2, 6, 12, 20, 30, 42];

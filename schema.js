@@ -164,6 +164,17 @@ module.exports.ObjectiveOption = {
     category: { type: Text },
     rules: { type: Markdown },
     source: { type: Text },
+    scoreType: {
+      default: "single",
+      type: Select,
+      options: [
+        { value: "single", label: "Single" },
+        { value: "perTurn", label: "Per Turn" },
+        { value: "checkbox", label: "Set amount" }, // goal - display an appropriate number of checkboxes aka 'Assassinate' provides 5
+        { value: "divideByTen", label: "Divide By Ten" }, // thin their ranks
+      ],
+    },
+    checkboxVal: { type: Integer },
   },
 };
 
@@ -171,6 +182,11 @@ module.exports.Objective = {
   fields: {
     name: { type: Text },
     score: { type: Integer },
+    turn1: { type: Integer },
+    turn2: { type: Integer },
+    turn3: { type: Integer },
+    turn4: { type: Integer },
+    turn5: { type: Integer },
     selection: { type: Relationship, ref: "ObjectiveOption" },
   },
 };
